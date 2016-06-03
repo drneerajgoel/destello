@@ -1,19 +1,16 @@
 public class Memory {
-	int[] mem = new int[5];
-   /* this is the function which can be used to initialize memoery instead of a constructor
-    * public void memCreation(int size){
-	    mem = new int[size];
-	   }*/
+	long[] mem = new long[5];
+   
 	// constructor  to initialize memory
 	public Memory(int size){
-		int[] mem= new int[size];
+		long[] mem= new long[size];
 	}
-   public int readMemory(int addr){
-	   int index=addr/4;
+   public long readMemory(long addr){
+	   int index=(int)(addr/4);
 	   return mem[index];	   
    }
-   public  void writeMemory(int addr, int data){
-	   int index=addr/4;
+   public  void writeMemory(long addr, long data){
+	   int index=(int)addr/4;
 	   mem[index]=data;
    }
    }
