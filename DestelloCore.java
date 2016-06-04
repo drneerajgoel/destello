@@ -5,8 +5,11 @@ public class DestelloCore {
   * r14- stack pointer,
   * r15- return address,
   * r16- program counter and
-  * r17- psw
+  * r17- psw(flags register) 
+  * since flags.e and flags.gt cannot be set simultaneously therefore r[17]=1(flags.e) r[17]=2 flags.gt r[17]=0 default
   * */
+ public int instMemSize;
+ public int dataMemSize;
  private long inst;
  private int Rd;
  private  long ldResult;
@@ -15,9 +18,9 @@ public class DestelloCore {
  private long AluResult;
  private long branchPC;
  private long Off;
- private int[] flags =new int[2];  // flags[0]=eq flags[1] =gt
- Memory instmemory = new Memory(1024);// instruction memory created 4K bytes
- Memory datamemory = new Memory(512);// data Memory created 2K Bytes
+ 
+ Memory instmemory = new Memory(instMemSize);// instruction memory created 4K bytes
+ Memory datamemory = new Memory(dataMemSize);// data Memory created 2K Bytes
 
  private int[] controlsignals = new int[24];// controlsignals[22]=isBranchTaken controlsignals[23]=nop
  public long time;
@@ -191,8 +194,9 @@ public class DestelloCore {
 	 }
 	 case 19: //call isUBrranch
 	 {
-		 controlsignals[7]=1;
-		 controlsignals[6]=1;//is wb
+		 controlsignals[8]=1;//isCall
+		 controlsignals[7]=1;//is UBranch
+		 controlsignals[6]=1;//iswb
 		 break;
 	 }
 	 case 20: //ret isUBranch
@@ -215,25 +219,95 @@ public class DestelloCore {
  // execute stage
  
  private void execute(){
+	 aluUnit();//execution of all arithmetic and logical instructions
+	 branchUnit();//execution of all branch instructions
+	if(controlsignals[21]==1)// execution of mov
+	 {
+		 reg[Rd]=operand2;
+	 }
 	 
-	 long mar;
-	 long mdr;	 
-	 if(controlsignals[0]==1)      //execution of store
+ }// end of execute
+ //memory access and write back stages are not exclusively programmed they are amalgamated with execute stage only 
+
+ private long aluUnit(){
+	 
+	 if(controlsignals[9]==1)// add
 	 {
-	
-		 mar = operand2 + operand1;
-		 mdr = reg[Rd];
-		 datamemory.writeMemory(mdr, mar);
+		 AluResult=operand1+operand2;
 	 }
-	 else if(controlsignals[1]==1)  // execution of load
+	 else if(controlsignals[10]==1)//sub
 	 {
-	    mar= operand1 +operand2;
-	   ldResult =datamemory.readMemory(mar);
-	   reg[Rd]=ldResult;
+		 AluResult=operand1-operand2;
+		 
 	 }
-	 else if(controlsignals[2]==1)// beq 
+	 else if(controlsignals[11]==1)//cmp
 	 {
-		 if (flags[0]==1)
+		 AluResult=operand1-operand2;
+		 if(AluResult==0)
+		 {
+			reg[17]=1; 
+		 }
+		 else if (AluResult>0)
+		 {
+			 reg[17]=2;
+		 }
+		 else
+		 {
+			 reg[17]=0;
+		 }
+	 }
+	 else if(controlsignals[12]==1)//mul
+	 {
+		 AluResult=operand1*operand2;
+		
+	 }
+	 else if(controlsignals[13]==1)//div
+	 {
+		 AluResult=operand1/operand2;
+		
+	 }
+	 else if(controlsignals[14]==1)//mod
+	 {
+		 AluResult=operand1%operand2;
+		 
+	 }
+	 else if(controlsignals[15]==1)//lsl
+	 {
+		 AluResult=operand1<<operand2;
+		 
+	 }
+	 else if(controlsignals[16]==1)//lsr
+	 {
+		 AluResult=operand1>>>operand2;
+		 
+	 }
+	 else if(controlsignals[17]==1)//asr
+	 {
+		 AluResult=operand1>>operand2;
+		 
+	 }
+	 else if(controlsignals[18]==1)//or
+	 {
+		 AluResult=operand1|operand2;
+		
+	 }
+	 else if(controlsignals[19]==1)//and
+	 {
+		 AluResult=operand1&operand2;
+		 
+	 }
+	 else if(controlsignals[20]==1)//not
+	 {
+		 AluResult=~operand1;
+		 
+	 }
+	 return AluResult;
+ }
+ 
+ private void branchUnit(){
+	if(controlsignals[2]==1)// beq 
+	 {
+		 if (reg[17]==1)
 		 {
 			 controlsignals[22]=1;
 			 branchPC=Off<<2;
@@ -241,7 +315,7 @@ public class DestelloCore {
 	 }
 	 else if(controlsignals[3]==1)// bgt
 	 {
-		 if (flags[1]==1)
+		 if (reg[17]==2)
 		 {
 			 controlsignals[22]=1;
 			 branchPC=Off<<2;
@@ -260,92 +334,78 @@ public class DestelloCore {
 	 {
 		 reg[15]= reg[16]+4;
 	 }
-	 
-	 // write back executed simultaneously
-	 else if(controlsignals[9]==1&&controlsignals[6]==1)// add
+ }
+ 
+ void memoryAccessUnit(){
+	 long mar;
+	 long mdr;	 
+	 if(controlsignals[0]==1)      //execution of store
 	 {
-		 AluResult=operand1+operand2;
-		 reg[Rd]=AluResult;
+	
+		 mar = operand2 + operand1;
+		 mdr = reg[Rd];
+		 datamemory.writeMemory(mdr, mar);
 	 }
-	 else if(controlsignals[10]==1&&controlsignals[6]==1)//sub
+	 else if(controlsignals[1]==1)  // execution of load
 	 {
-		 AluResult=operand1-operand2;
-		 reg[Rd]=AluResult;
+	    mar= operand1 +operand2;
+	   ldResult =datamemory.readMemory(mar);
 	 }
-	 else if(controlsignals[11]==1&&controlsignals[6]==1)//cmp
+ }
+ 
+ public void writeBackUnit(){
+ 	 
+	 if(controlsignals[6]==1)//isWb is high
 	 {
-		 AluResult=operand1-operand2;
-		 if(AluResult==0)
+		 if(controlsignals[1]==1)//isLd is high
+		  {
+			 reg[Rd]=ldResult;
+		  }
+		 else if(controlsignals[9]==1)//isCall is high
 		 {
-			flags[0]=1; 
+			 reg[15]=reg[16]+4;
 		 }
 		 else
 		 {
-			 flags[0]=1;
+			 reg[Rd]=AluResult;
 		 }
 	 }
-	 else if(controlsignals[12]==1&&controlsignals[6]==1)//mul
-	 {
-		 AluResult=operand1*operand2;
-		 reg[Rd]=AluResult;
-	 }
-	 else if(controlsignals[13]==1&&controlsignals[6]==1)//div
-	 {
-		 AluResult=operand1/operand2;
-		 reg[Rd]=AluResult;
-	 }
-	 else if(controlsignals[14]==1&&controlsignals[6]==1)//mod
-	 {
-		 AluResult=operand1%operand2;
-		 reg[Rd]=AluResult;
-	 }
-	 else if(controlsignals[15]==1&&controlsignals[6]==1)//lsl
-	 {
-		 AluResult=operand1<<operand2;
-		 reg[Rd]=AluResult;
-	 }
-	 else if(controlsignals[16]==1&&controlsignals[6]==1)//lsr
-	 {
-		 AluResult=operand1>>>operand2;
-		 reg[Rd]=AluResult;
-	 }
-	 else if(controlsignals[17]==1&&controlsignals[6]==1)//asr
-	 {
-		 AluResult=operand1>>operand2;
-		 reg[Rd]=AluResult;
-	 }
-	 else if(controlsignals[18]==1&&controlsignals[6]==1)//or
-	 {
-		 AluResult=operand1|operand2;
-		 reg[Rd]=AluResult;
-	 }
-	 else if(controlsignals[19]==1&&controlsignals[6]==1)//and
-	 {
-		 AluResult=operand1&operand2;
-		 reg[Rd]=AluResult;
-	 }
-	 else if(controlsignals[20]==1&&controlsignals[6]==1)//not
-	 {
-		 AluResult=~operand1;
-		 reg[Rd]=AluResult;
-	 }
-	 else if(controlsignals[21]==1)
-	 {
-		 reg[Rd]=operand2;
-	 }
-	
-	 
- }// end of execute
- //memory access and write back stages are not exclusively programmed they are amalgamated with execute stage only 
-
- public void run()
+ }
+ 
+ public void run( long pc )
  {
+	 reg[16]=pc;
 	 if(controlsignals[23]==0)// next instruction is processed only if halt is not encountered 
 	 {
 	 fetch();
 	 decode();
 	 execute();
+	 memoryAccessUnit();
+	 writeBackUnit();
 	 } 
+ }
+ 
+ public void reset(){
+	 int j;
+	 for(j=0;j<18;j++)
+	 {
+		 reg[j]=0;
+	 }
+	 for(j=0;j<24;j++)
+	 {
+		 controlsignals[j]=0;
+	 }
+	   instMemSize=0;
+	   dataMemSize=0;
+	   inst=0;
+	   Rd=0;
+	   ldResult=0;
+	   operand1=0;
+	   operand2=0;
+	   AluResult=0;
+	   branchPC=0;
+	   Off=0;
+	 
  }
  }// end of class 
  
