@@ -1,6 +1,6 @@
 
 public class DestelloCore {
- private long[] reg= new long[18];
+ protected static long[] reg= new long[18];
  /*//r0-r13 general purpose, 
   * r14- stack pointer,
   * r15- return address,
@@ -8,47 +8,55 @@ public class DestelloCore {
   * r17- psw(flags register) 
   * since flags.e and flags.gt cannot be set simultaneously therefore r[17]=1(flags.e) r[17]=2 flags.gt r[17]=0 default
   * */
- public int instMemSize;
- public int dataMemSize;
- private long inst;
- private int Rd;
- private  long ldResult;
- private long operand1;
- private long operand2;
- private long AluResult;
- private long branchPC;
- private long Off;
- 
- Memory instmemory = new Memory(instMemSize);// instruction memory created 4K bytes
- Memory datamemory = new Memory(dataMemSize);// data Memory created 2K Bytes
 
- private int[] controlsignals = new int[24];// controlsignals[22]=isBranchTaken controlsignals[23]=nop
+ public static int instMemSize;
+ public static int dataMemSize;
+ private static long inst;
+ private static int Rd;
+ private static long ldResult;
+ private static long operand1;
+ private static long operand2;
+ private static long AluResult;
+ private static long branchPC;
+ private static long Off;
+ 
+ static Memory instmemory = new Memory(1024);// instruction memory created 4K bytes
+ static Memory datamemory = new Memory(1024);// data Memory created 2K Bytes
+
+ protected static int[] controlsignals = new int[24];// controlsignals[22]=isBranchTaken controlsignals[23]=nop
  public long time;
  
- private void fetch(){//start of fetch method
-     if(controlsignals[22]==1)
+ protected static void fetch(){//start of fetch method
+	 long PC = reg[16];
+     inst = instmemory.readMemory(PC);
+	 if(controlsignals[22]==1)
 	  {
 		  reg[16]= branchPC;
 	  }
      else
      {
-    	 reg[(int) 16]= (long)(reg[16]+4);     
+    	 reg[(int) 16]= (reg[16]+4);     
      }
-     long PC = reg[16];
      
-     inst= instmemory.readMemory(PC);
     
 	  }//end of fetch
 	 
- private void decode(){//start of decode
+ protected static String decode(){//start of decode
+
+	 String operation= new String();
+	 String destination= new String();
+	 String source1= new String();
+	 String source2= new String();	 
 	 int opcode=(int) (inst>>27);            
 	 int op =opcode&31;                     // opcode extracted
 	 int i= (int)inst>>26;
 	 i=i&1;                                 // immediate extracted
-	  Rd= (int)inst>>22;
-	  Rd=Rd&15;                             // destination address extracted 
+	 Rd= (int)inst>>22;
+	 Rd=Rd&15;// destination address extracted
+	  destination="R"+Integer.toString(Rd);
 	 int Rs1=(int)inst>>18;
-	 Rs1=Rs1&15;                             //source 1 address extracted
+	 Rs1=Rs1&15;//source 1 address extracted
+	 source1="R"+Integer.toString(Rs1);
 	 int Rs2=(int) inst>>14;
 	 Rs2=Rs2&15;                             //source 2 address extracted
 	 int Imm=(int) (inst&65535);            // 16bit immediate extracted 
@@ -76,10 +84,12 @@ public class DestelloCore {
 	 if(i==1)
 	 {
 		 operand2= immx;
+		 source2=Long.toString(Rs1);
 	 }
 	 else
 	 {
 		 operand2=reg[Rs2];
+		 source2="R"+Integer.toString(Rs2);
 	 }
 // generation of control signals based upon opcode	 
 	 switch(op)
@@ -88,108 +98,126 @@ public class DestelloCore {
 	 {
 		 controlsignals[9]=1;
 		 controlsignals[6]=1;//is wb
+		 operation="add";
 		 break;
 	 }
 	 case 1://sub isSub
 	 {
 		 controlsignals[10]=1;
 		 controlsignals[6]=1;//is wb
+		 operation="sub";
 		 break;
 	 } 
 	 case 2://mul isMul
 	 {
 		 controlsignals[12]=1;
 		 controlsignals[6]=1;//is wb
+		 operation="mul";
 		 break;
 	 } 	        
 	 case 3://div isDiv
 	 {
 		 controlsignals[13]=1;
 		 controlsignals[6]=1;//is wb
+		 operation="div";
 		 break;
 	 } 	 
 	 case 4: // mod isMod
 	 {
 		 controlsignals[14]=1;
 		 controlsignals[6]=1;//is wb
+		 operation="mod";
 		 break;
 	 }
 	 case 5: // cmp isCmp
 	 {
 		 controlsignals[11]=1;
-		 
+		 operation="cmp";
 		 break;
 	 }
 	 case 6: // and isAnd
 	 {
 		 controlsignals[19]=1;
 		 controlsignals[6]=1;//is wb
+		 operation="and";
 		 break;
 	 }
 	 case 7: // or isOr
 	 {
 		 controlsignals[18]=1;
 		 controlsignals[6]=1;//is wb
+		 operation="and";
 		 break;
 	 }
 	 case 8: //not isNot
 	 {
 		 controlsignals[20]=1;
 		 controlsignals[6]=1;//is wb
+		 operation="not";
 		 break;
 	 }
 	 case 9: //mov isMov
 	 {
 		 controlsignals[21]=1;
 		 controlsignals[6]=1;//is wb
+		 operation="mov";
 		 break;
 	 }
 	 case 10: //lsl isLsl
 	 {
 		 controlsignals[15]=1;
 		 controlsignals[6]=1;//is wb
+		 operation="lsl";
 		 break;
 	 }
 	 case 11: // lsr isLsr
 	 {
 		 controlsignals[16]=1;
 		 controlsignals[6]=1;//is wb
+		 operation="lsr";
 		 break;
 	 }
 	 case 12: // asr isAsr
 	 {
 		 controlsignals[17]=1;
 		 controlsignals[6]=1;//is wb
+		 operation="asr";
 		 break;
 	 }
 	 case 13: //nop does nothing and breaks
 	 {
+		 operation="nop";
 		 break;
 	 }
 	 case 14: //ld isLd
 	 {
 		 controlsignals[1]=1;
 		 controlsignals[6]=1;//is wb
+		 operation="ld";
 		 break;
 	 }
 	 case 15: // st isSt
 	 {
 		 controlsignals[0]=1;
+		 operation="st";
 		 break;
 	 }
 	 case 16: //beq isBeq
 	 {
 		 controlsignals[2]=1;
+		 operation="beq";
 		 break;
 	 }
 	 case 17: //bgt isBgt
 	 {
 		 controlsignals[3]=1;
+		 operation="bgt";
 		 break;
 	 }
 	 case 18: //b isUBranch
 	 {
 		 controlsignals[7]=1;
+		 operation="b";
 		 break;
 	 }
 	 case 19: //call isUBrranch
@@ -197,28 +225,58 @@ public class DestelloCore {
 		 controlsignals[8]=1;//isCall
 		 controlsignals[7]=1;//is UBranch
 		 controlsignals[6]=1;//iswb
+		 operation="call";
 		 break;
 	 }
 	 case 20: //ret isUBranch
 	 {
 		 controlsignals[7]=1;
+		 operation="ret";
 		 break;
 	 }
-	 case 30: //halt
+	 case 21: //halt
 	 {
 		 controlsignals[23]=1;
+		 operation="halt";
 		 break;
 	 }
 	 }//end of switch
 // all the control signals are generated and decoding ends here	
-	  
+	 String dissassembly= new String();
+	 if(operation=="ret"||operation=="nop"||operation=="halt"){
+		 dissassembly = new StringBuilder().append(operation).toString(); 
+		
+	 }
+	 else if(operation=="call"||operation=="b"||operation=="beq"||operation=="bgt"){
+			 dissassembly = new StringBuilder().append(operation).append(" ").append(Off).toString(); 
+			 
+}
+	 else if(operation=="add"||operation=="sub"||operation=="mul"||operation=="div"||operation=="mod"||operation=="and"||operation=="or"||operation=="lsl"||operation=="lsr"||operation=="asr"){
+			 dissassembly = new StringBuilder().append(operation).append(" ").append(destination).append(",").append(source1).append(",").append(source2).toString(); 
+			
+ }
+	 else if(operation=="cmp"){
+			 dissassembly = new StringBuilder().append(operation).append(" ").append(source1).append(",").append(source2).toString(); 
+			
+}
+	 else if(operation=="mov"||operation=="not"){
+			 dissassembly = new StringBuilder().append(operation).append(" ").append(destination).append(",").append(source2).toString(); 
+			 
+}
+	 else if(operation=="ld"||operation=="st"){
+			 dissassembly = new StringBuilder().append(operation).append(" ").append(destination).append(",").append(source2).append(" ").append(source1).toString(); 
+
+			 
+}
+	 return dissassembly;
+	 
 	 
 	 
  }// end of decode
  
  // execute stage
  
- private void execute(){
+ protected static void execute(){
 	 aluUnit();//execution of all arithmetic and logical instructions
 	 branchUnit();//execution of all branch instructions
 	if(controlsignals[21]==1)// execution of mov
@@ -227,9 +285,8 @@ public class DestelloCore {
 	 }
 	 
  }// end of execute
- //memory access and write back stages are not exclusively programmed they are amalgamated with execute stage only 
-
- private long aluUnit(){
+ 
+ protected static long aluUnit(){
 	 
 	 if(controlsignals[9]==1)// add
 	 {
@@ -304,7 +361,7 @@ public class DestelloCore {
 	 return AluResult;
  }
  
- private void branchUnit(){
+ protected static void branchUnit(){
 	if(controlsignals[2]==1)// beq 
 	 {
 		 if (reg[17]==1)
@@ -336,7 +393,7 @@ public class DestelloCore {
 	 }
  }
  
- void memoryAccessUnit(){
+protected static void memoryAccessUnit(){
 	 long mar;
 	 long mdr;	 
 	 if(controlsignals[0]==1)      //execution of store
@@ -345,6 +402,7 @@ public class DestelloCore {
 		 mar = operand2 + operand1;
 		 mdr = reg[Rd];
 		 datamemory.writeMemory(mdr, mar);
+		 controlsignals[0]=0;
 	 }
 	 else if(controlsignals[1]==1)  // execution of load
 	 {
@@ -353,17 +411,25 @@ public class DestelloCore {
 	 }
  }
  
- public void writeBackUnit(){
+ protected static void writeBackUnit(){
  	 
 	 if(controlsignals[6]==1)//isWb is high
 	 {
 		 if(controlsignals[1]==1)//isLd is high
 		  {
 			 reg[Rd]=ldResult;
+			 controlsignals[1]=0;
+			 
 		  }
-		 else if(controlsignals[9]==1)//isCall is high
+		 else if(controlsignals[8]==1)//isCall is high
 		 {
 			 reg[15]=reg[16]+4;
+			 controlsignals[8]=0;
+		 }
+		 else if(controlsignals[21]==1)//isMov is high
+		 {
+			 reg[Rd]=reg[Rd];
+			 controlsignals[21]=0;
 		 }
 		 else
 		 {
@@ -372,17 +438,14 @@ public class DestelloCore {
 	 }
  }
  
- public void run( long pc )
+ public static void run()
  {
-	 reg[16]=pc;
-	 if(controlsignals[23]==0)// next instruction is processed only if halt is not encountered 
-	 {
 	 fetch();
 	 decode();
 	 execute();
 	 memoryAccessUnit();
 	 writeBackUnit();
-	 } 
+	
  }
  
  public void reset(){
