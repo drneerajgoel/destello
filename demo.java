@@ -8,10 +8,14 @@ public class demo {
 	public static void main(String[] args){
 		DestelloDebugger d = new DestelloDebugger();
 		d.loadInstMemory("C:\\Users\\Gian Singh\\Documents\\hi.txt");
-		d.runProgram(0L);
+		String[] s4=d.runProgram(0L);
 		
-		long Rd = d.getRegisterValue(3);
-		System.out.println(Rd);
+		long Rd = d.getRegisterValue(3);	
+		for(int q=0;q<4;q++)
+		{
+		System.out.println(s4[q]);
+		}
+		System.out.println("Result is:"+Rd);
 		}
 	
 		

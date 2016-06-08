@@ -59,13 +59,18 @@ public class DestelloDebugger extends DestelloCore {
 		  }
 	  } 
 	  }
- public  void runProgram(long pc)
+ public  String[] runProgram(long pc)
  {
+	 String[] s3 = new String[10];
 	reg[16]=pc;
+	int y=0;
 	 while(controlsignals[23]!=1)
 	 { 
-		 run();
+		 String s2=run();
+		 s3[y]= s2;
+		 y++;
 		 
 	 }
+	 return s3;
  }
 }

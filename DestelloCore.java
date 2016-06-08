@@ -84,7 +84,7 @@ public class DestelloCore {
 	 if(i==1)
 	 {
 		 operand2= immx;
-		 source2=Long.toString(Rs1);
+		 source2=Long.toString(immx);
 	 }
 	 else
 	 {
@@ -438,14 +438,14 @@ protected static void memoryAccessUnit(){
 	 }
  }
  
- public static void run()
+ public static String run()
  {
 	 fetch();
-	 decode();
+	String s1 =decode();
 	 execute();
 	 memoryAccessUnit();
 	 writeBackUnit();
-	
+	return s1;
  }
  
  public void reset(){
