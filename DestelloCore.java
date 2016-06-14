@@ -1,6 +1,7 @@
 
 public class DestelloCore {
  protected static long[] reg= new long[18];
+
  /*//r0-r13 general purpose, 
   * r14- stack pointer,
   * r15- return address,
@@ -9,27 +10,28 @@ public class DestelloCore {
   * since flags.e and flags.gt cannot be set simultaneously therefore r[17]=1(flags.e) r[17]=2 flags.gt r[17]=0 default
   * */
 
- public static int instMemSize;
- public static int dataMemSize;
+ public static int memSize;
+
  private static long inst;
  private static int Rd;
  private static long ldResult;
  private static long operand1;
  private static long operand2;
- private static long AluResult;
+ private static long aluResult;
  private static long branchPC;
  private static long Off;
- 
- static Memory instmemory = new Memory(1024);// instruction memory created 4K bytes
- static Memory datamemory = new Memory(1024);// data Memory created 2K Bytes
+ public  int time=0;
+ protected static long startingPC;
+ static Memory onChipMemory = new Memory(1024);// instruction memory created 4K bytes
 
- protected static int[] controlsignals = new int[24];// controlsignals[22]=isBranchTaken controlsignals[23]=nop
- public long time;
+
+ protected static int[] controlSignals = new int[24];// controlsignals[22]=isBranchTaken controlsignals[23]=nop
+
  
  protected static void fetch(){//start of fetch method
 	 long PC = reg[16];
-     inst = instmemory.readMemory(PC);
-	 if(controlsignals[22]==1)
+     inst = onChipMemory.readMemory(PC);
+	 if(controlSignals[22]==1)
 	  {
 		  reg[16]= branchPC;
 	  }
@@ -96,91 +98,91 @@ public class DestelloCore {
 	 {//start of switch case
 	 case 0: //add isAdd
 	 {
-		 controlsignals[9]=1;
-		 controlsignals[6]=1;//is wb
+		 controlSignals[9]=1;
+		 controlSignals[6]=1;//is wb
 		 operation="add";
 		 break;
 	 }
 	 case 1://sub isSub
 	 {
-		 controlsignals[10]=1;
-		 controlsignals[6]=1;//is wb
+		 controlSignals[10]=1;
+		 controlSignals[6]=1;//is wb
 		 operation="sub";
 		 break;
 	 } 
 	 case 2://mul isMul
 	 {
-		 controlsignals[12]=1;
-		 controlsignals[6]=1;//is wb
+		 controlSignals[12]=1;
+		 controlSignals[6]=1;//is wb
 		 operation="mul";
 		 break;
 	 } 	        
 	 case 3://div isDiv
 	 {
-		 controlsignals[13]=1;
-		 controlsignals[6]=1;//is wb
+		 controlSignals[13]=1;
+		 controlSignals[6]=1;//is wb
 		 operation="div";
 		 break;
 	 } 	 
 	 case 4: // mod isMod
 	 {
-		 controlsignals[14]=1;
-		 controlsignals[6]=1;//is wb
+		 controlSignals[14]=1;
+		 controlSignals[6]=1;//is wb
 		 operation="mod";
 		 break;
 	 }
 	 case 5: // cmp isCmp
 	 {
-		 controlsignals[11]=1;
+		 controlSignals[11]=1;
 		 operation="cmp";
 		 break;
 	 }
 	 case 6: // and isAnd
 	 {
-		 controlsignals[19]=1;
-		 controlsignals[6]=1;//is wb
+		 controlSignals[19]=1;
+		 controlSignals[6]=1;//is wb
 		 operation="and";
 		 break;
 	 }
 	 case 7: // or isOr
 	 {
-		 controlsignals[18]=1;
-		 controlsignals[6]=1;//is wb
+		 controlSignals[18]=1;
+		 controlSignals[6]=1;//is wb
 		 operation="and";
 		 break;
 	 }
 	 case 8: //not isNot
 	 {
-		 controlsignals[20]=1;
-		 controlsignals[6]=1;//is wb
+		 controlSignals[20]=1;
+		 controlSignals[6]=1;//is wb
 		 operation="not";
 		 break;
 	 }
 	 case 9: //mov isMov
 	 {
-		 controlsignals[21]=1;
-		 controlsignals[6]=1;//is wb
+		 controlSignals[21]=1;
+		 controlSignals[6]=1;//is wb
 		 operation="mov";
 		 break;
 	 }
 	 case 10: //lsl isLsl
 	 {
-		 controlsignals[15]=1;
-		 controlsignals[6]=1;//is wb
+		 controlSignals[15]=1;
+		 controlSignals[6]=1;//is wb
 		 operation="lsl";
 		 break;
 	 }
 	 case 11: // lsr isLsr
 	 {
-		 controlsignals[16]=1;
-		 controlsignals[6]=1;//is wb
+		 controlSignals[16]=1;
+		 controlSignals[6]=1;//is wb
 		 operation="lsr";
 		 break;
 	 }
 	 case 12: // asr isAsr
 	 {
-		 controlsignals[17]=1;
-		 controlsignals[6]=1;//is wb
+		 controlSignals[17]=1;
+		 controlSignals[6]=1;//is wb
 		 operation="asr";
 		 break;
 	 }
@@ -191,55 +193,57 @@ public class DestelloCore {
 	 }
 	 case 14: //ld isLd
 	 {
-		 controlsignals[1]=1;
-		 controlsignals[6]=1;//is wb
+		 controlSignals[1]=1;
+		 controlSignals[6]=1;//is wb
 		 operation="ld";
 		 break;
 	 }
 	 case 15: // st isSt
 	 {
-		 controlsignals[0]=1;
+		 controlSignals[0]=1;
 		 operation="st";
 		 break;
 	 }
 	 case 16: //beq isBeq
 	 {
-		 controlsignals[2]=1;
+		 controlSignals[2]=1;
 		 operation="beq";
 		 break;
 	 }
 	 case 17: //bgt isBgt
 	 {
-		 controlsignals[3]=1;
+		 controlSignals[3]=1;
 		 operation="bgt";
 		 break;
 	 }
 	 case 18: //b isUBranch
 	 {
-		 controlsignals[7]=1;
+		 controlSignals[7]=1;
 		 operation="b";
 		 break;
 	 }
 	 case 19: //call isUBrranch
 	 {
-		 controlsignals[8]=1;//isCall
-		 controlsignals[7]=1;//is UBranch
-		 controlsignals[6]=1;//iswb
+		 controlSignals[8]=1;//isCall
+		 controlSignals[7]=1;//is UBranch
+		 controlSignals[6]=1;//iswb
 		 operation="call";
 		 break;
 	 }
 	 case 20: //ret isUBranch
 	 {
-		 controlsignals[7]=1;
+		 controlSignals[7]=1;
 		 operation="ret";
 		 break;
 	 }
 	 case 21: //halt
 	 {
-		 controlsignals[23]=1;
+		 controlSignals[23]=1;
 		 operation="halt";
 		 break;
 	 }
+	 default:
+		 operation =" invalid";
 	 }//end of switch
 // all the control signals are generated and decoding ends here	
 	 String dissassembly= new String();
@@ -268,6 +272,8 @@ public class DestelloCore {
 
 			 
 }
+	 else
+		 dissassembly= "Invalid Instruction";
 	 return dissassembly;
 	 
 	 
@@ -279,7 +285,7 @@ public class DestelloCore {
  protected static void execute(){
 	 aluUnit();//execution of all arithmetic and logical instructions
 	 branchUnit();//execution of all branch instructions
-	if(controlsignals[21]==1)// execution of mov
+	if(controlSignals[21]==1)// execution of mov
 	 {
 		 reg[Rd]=operand2;
 	 }
@@ -288,23 +294,23 @@ public class DestelloCore {
  
  protected static long aluUnit(){
 	 
-	 if(controlsignals[9]==1)// add
+	 if(controlSignals[9]==1)// add
 	 {
-		 AluResult=operand1+operand2;
+		 aluResult=operand1+operand2;
 	 }
-	 else if(controlsignals[10]==1)//sub
+	 else if(controlSignals[10]==1)//sub
 	 {
-		 AluResult=operand1-operand2;
+		 aluResult=operand1-operand2;
 		 
 	 }
-	 else if(controlsignals[11]==1)//cmp
+	 else if(controlSignals[11]==1)//cmp
 	 {
-		 AluResult=operand1-operand2;
-		 if(AluResult==0)
+		 aluResult=operand1-operand2;
+		 if(aluResult==0)
 		 {
 			reg[17]=1; 
 		 }
-		 else if (AluResult>0)
+		 else if (aluResult>0)
 		 {
 			 reg[17]=2;
 		 }
@@ -313,81 +319,81 @@ public class DestelloCore {
 			 reg[17]=0;
 		 }
 	 }
-	 else if(controlsignals[12]==1)//mul
+	 else if(controlSignals[12]==1)//mul
 	 {
-		 AluResult=operand1*operand2;
+		 aluResult=operand1*operand2;
 		
 	 }
-	 else if(controlsignals[13]==1)//div
+	 else if(controlSignals[13]==1)//div
 	 {
-		 AluResult=operand1/operand2;
+		 aluResult=operand1/operand2;
 		
 	 }
-	 else if(controlsignals[14]==1)//mod
+	 else if(controlSignals[14]==1)//mod
 	 {
-		 AluResult=operand1%operand2;
+		 aluResult=operand1%operand2;
 		 
 	 }
-	 else if(controlsignals[15]==1)//lsl
+	 else if(controlSignals[15]==1)//lsl
 	 {
-		 AluResult=operand1<<operand2;
+		 aluResult=operand1<<operand2;
 		 
 	 }
-	 else if(controlsignals[16]==1)//lsr
+	 else if(controlSignals[16]==1)//lsr
 	 {
-		 AluResult=operand1>>>operand2;
+		 aluResult=operand1>>>operand2;
 		 
 	 }
-	 else if(controlsignals[17]==1)//asr
+	 else if(controlSignals[17]==1)//asr
 	 {
-		 AluResult=operand1>>operand2;
+		 aluResult=operand1>>operand2;
 		 
 	 }
-	 else if(controlsignals[18]==1)//or
+	 else if(controlSignals[18]==1)//or
 	 {
-		 AluResult=operand1|operand2;
+		 aluResult=operand1|operand2;
 		
 	 }
-	 else if(controlsignals[19]==1)//and
+	 else if(controlSignals[19]==1)//and
 	 {
-		 AluResult=operand1&operand2;
+		 aluResult=operand1&operand2;
 		 
 	 }
-	 else if(controlsignals[20]==1)//not
+	 else if(controlSignals[20]==1)//not
 	 {
-		 AluResult=~operand1;
+		 aluResult=~operand1;
 		 
 	 }
-	 return AluResult;
+	 return aluResult;
  }
  
  protected static void branchUnit(){
-	if(controlsignals[2]==1)// beq 
+	if(controlSignals[2]==1)// beq 
 	 {
 		 if (reg[17]==1)
 		 {
-			 controlsignals[22]=1;
+			 controlSignals[22]=1;
 			 branchPC=Off<<2;
 		 }
 	 }
-	 else if(controlsignals[3]==1)// bgt
+	 else if(controlSignals[3]==1)// bgt
 	 {
 		 if (reg[17]==2)
 		 {
-			 controlsignals[22]=1;
+			 controlSignals[22]=1;
 			 branchPC=Off<<2;
 		 }		 
 	 }
-	 else if(controlsignals[4]==1)// ret
+	 else if(controlSignals[4]==1)// ret
 	 {
-		 controlsignals[22]=1;
+		 controlSignals[22]=1;
 		 branchPC=reg[15];
 	 }
-	 else if(controlsignals[7]==1)//b,call,ret
+	 else if(controlSignals[7]==1)//b,call,ret
 	 {
-		 controlsignals[22]=1;
+		 controlSignals[22]=1;
 	 }
-	 else if(controlsignals[8]==1)
+	 else if(controlSignals[8]==1)
 	 {
 		 reg[15]= reg[16]+4;
 	 }
@@ -396,44 +402,44 @@ public class DestelloCore {
 protected static void memoryAccessUnit(){
 	 long mar;
 	 long mdr;	 
-	 if(controlsignals[0]==1)      //execution of store
+	 if(controlSignals[0]==1)      //execution of store
 	 {
 	
 		 mar = operand2 + operand1;
 		 mdr = reg[Rd];
-		 datamemory.writeMemory(mdr, mar);
-		 controlsignals[0]=0;
+		 onChipMemory.writeMemory(mdr, mar);
+		 controlSignals[0]=0;
 	 }
-	 else if(controlsignals[1]==1)  // execution of load
+	 else if(controlSignals[1]==1)  // execution of load
 	 {
 	    mar= operand1 +operand2;
-	   ldResult =datamemory.readMemory(mar);
+	   ldResult =onChipMemory.readMemory(mar);
 	 }
  }
  
  protected static void writeBackUnit(){
  	 
-	 if(controlsignals[6]==1)//isWb is high
+	 if(controlSignals[6]==1)//isWb is high
 	 {
-		 if(controlsignals[1]==1)//isLd is high
+		 if(controlSignals[1]==1)//isLd is high
 		  {
 			 reg[Rd]=ldResult;
-			 controlsignals[1]=0;
+			 controlSignals[1]=0;
 			 
 		  }
-		 else if(controlsignals[8]==1)//isCall is high
+		 else if(controlSignals[8]==1)//isCall is high
 		 {
 			 reg[15]=reg[16]+4;
-			 controlsignals[8]=0;
+			 controlSignals[8]=0;
 		 }
-		 else if(controlsignals[21]==1)//isMov is high
+		 else if(controlSignals[21]==1)//isMov is high
 		 {
 			 reg[Rd]=reg[Rd];
-			 controlsignals[21]=0;
+			 controlSignals[21]=0;
 		 }
 		 else
 		 {
-			 reg[Rd]=AluResult;
+			 reg[Rd]=aluResult;
 		 }
 	 }
  }
@@ -456,16 +462,16 @@ protected static void memoryAccessUnit(){
 	 }
 	 for(j=0;j<24;j++)
 	 {
-		 controlsignals[j]=0;
+		 controlSignals[j]=0;
 	 }
-	   instMemSize=0;
-	   dataMemSize=0;
+	   memSize=0;
+	   
 	   inst=0;
 	   Rd=0;
 	   ldResult=0;
 	   operand1=0;
 	   operand2=0;
-	   AluResult=0;
+	   aluResult=0;
 	   branchPC=0;
 	   Off=0;
 	 

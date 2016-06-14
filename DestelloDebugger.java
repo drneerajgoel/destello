@@ -3,10 +3,12 @@ import java.util.*;
 
 
 public class DestelloDebugger extends DestelloCore {
-	 private static long currentpc=0;
-	  private static int k=0;
-	 private static long nextpc=0;
- public long getRegisterValue(int RegID){
+	 static long currentPC=startingPC;//stores value of last executed pc
+	  static int k=0;
+	 int MAX =20;
+	  private static long nextPC;
+
+	 public long getRegisterValue(int RegID){
 	 long registerValue;
 	 registerValue=reg[RegID];
 	return registerValue ;
@@ -14,11 +16,17 @@ public class DestelloDebugger extends DestelloCore {
  
  public long getMemoryValue(long address){
 	 long memoryValue;
-	 memoryValue= datamemory.readMemory(address);
+	 memoryValue= onChipMemory.readMemory(address);
 	 return memoryValue;
  }
+ 
+ public void writeMemory(long address, long data){
+	 onChipMemory.writeMemory(address,data);
+ }
+ 
  public void loadInstMemory(String filename){
-	Scanner x=null;
+	 long instaddr =0L;
+	 Scanner x=null;
 	try{
 	x = new Scanner( new File(filename));
 	}
@@ -28,49 +36,71 @@ public class DestelloDebugger extends DestelloCore {
 	 while(x.hasNext())
 	 {
 		 String pc = x.next();
-		 long instaddr=Long.decode(pc);
+		 instaddr=Long.decode(pc);
 		 
 		 String data=x.next();
 		 long inputinst=Long.parseLong(data, 16);
-		 instmemory.writeMemory(instaddr, inputinst);	 
+		 onChipMemory.writeMemory(instaddr, inputinst);	 
+		 time++;
 	 }
 	
 	 x.close();
+	 startingPC=instaddr-(4*time)+ 4;
 	}
- public static void debug(int[] breakpoints, boolean yes){
-	 // yes takes the value high when either run, continue is pressed
-	  currentpc=reg[16];
-	  k=0;
-	  nextpc=breakpoints[k];
-	  int i= (int)(nextpc-currentpc)/4;//number of instructions that need to be calculated  
-	
-	  for(int x=0;x<breakpoints.length;x++ )
+//this function provides disassembly of at most 20 instructions
+public String[] disassemblyView(long startPC){
+	  String[] fullDisassembly= new String[time];
+	  reg[16]=startPC;
+	  for(int i=0;i<MAX;i++)
 	  {
-		  if(yes){
-	     for(int j=0;j<i;j++)
-	     {
-	    	// run(currentpc);
-	    	 //currentpc=currentpc+4;
-	     }
-	     k++; 
-	     nextpc=breakpoints[k];
-	     i= (int)(nextpc-currentpc)/4;
-		  yes=false;
+		  fetch();
+		  fullDisassembly[i]=decode();
+		  if(controlSignals[23]==1)
+		  {
+			  break;
+		
 		  }
-	  } 
 	  }
- public  String[] runProgram(long pc)
- {
-	 String[] s3 = new String[10];
-	reg[16]=pc;
-	int y=0;
-	 while(controlsignals[23]!=1)
-	 { 
-		 String s2=run();
-		 s3[y]= s2;
-		 y++;
-		 
-	 }
-	 return s3;
+	  reg[16]=startingPC;
+	  
+	   return fullDisassembly;
  }
+
+/*debug function accepts breakpoints array
+ * it executes program before breakpoint pc
+ * 'yes' is boolean value set high only by run and continue
+ * 'step' is a boolean value set high by step button only
+ * stop button in the GUI can be eliminated. It finds no use here or can be assigned another functionality 
+ */
+public void debug(long[] breakpoints, boolean yes,boolean step){
+	 // yes takes the value high when either run, continue is pressed
+	int i;  
+	currentPC=reg[16];
+	  if(step)
+	  {
+		  run();
+		  step=false;
+	  }
+	  else if(yes)
+	  {
+		  nextPC=breakpoints[k];
+		  if(nextPC < startingPC + 4*time&&nextPC!=0)
+		  	{
+			  	i= (int)(nextPC-currentPC)/4;//number of instructions that need to be calculated  
+			  	 k++;
+			}
+		  else 
+		  	{
+			  	i=time;
+		  	}
+		  for(int j=0;j<i;j++)
+		  	{
+			  run();	  
+		  	}
+	    
+	  }
+	  yes=false;
+	}
+	  
+	  
 }
