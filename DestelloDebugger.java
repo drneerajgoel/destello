@@ -46,6 +46,10 @@ public class DestelloDebugger extends DestelloCore {
 	
 	 x.close();
 	 startingPC=instaddr-(4*time)+ 4;
+	 if(print.level==2||print.level==3)
+	 {
+		 System.out.println("Starting pc="+startingPC);
+	 }
 	}
 //this function provides disassembly of at most 20 instructions
 public String[] disassemblyView(long startPC){
@@ -72,10 +76,10 @@ public String[] disassemblyView(long startPC){
  * 'step' is a boolean value set high by step button only
  * stop button in the GUI can be eliminated. It finds no use here or can be assigned another functionality 
  */
-public void debug(long[] breakpoints, boolean yes,boolean step){
+public void debug(long[] breakpoints,boolean yes, boolean step){
 	 // yes takes the value high when either run, continue is pressed
 	int i;  
-	currentPC=reg[16];
+	
 	  if(step)
 	  {
 		  run();
@@ -96,10 +100,22 @@ public void debug(long[] breakpoints, boolean yes,boolean step){
 		  for(int j=0;j<i;j++)
 		  	{
 			  run();	  
+			  //System.out.println("I'm in run in debug");
 		  	}
 	    
 	  }
+	  currentPC=reg[16];
+	  
 	  yes=false;
+	  if(print.level==2||print.level==3)
+		 {
+			 System.out.println("current pc="+currentPC);
+		 }
+	  if(print.level==3)
+		 { for(int x=0;x<18;x++){
+			 System.out.println("Register"+x+" "+reg[x]);
+		   }
+		 }
 	}
 	  
 	  

@@ -24,7 +24,7 @@ public class DestelloCore {
  protected static long startingPC;
  static Memory onChipMemory = new Memory(1024);// instruction memory created 4K bytes
 
-
+static DebugPrint print = new DebugPrint();
  protected static int[] controlSignals = new int[24];// controlsignals[22]=isBranchTaken controlsignals[23]=nop
 
  
@@ -39,7 +39,9 @@ public class DestelloCore {
      {
     	 reg[(int) 16]= (reg[16]+4);     
      }
-     
+     if(print.level==2){
+    	 System.out.println("I'm in fetch");
+     }
     
 	  }//end of fetch
 	 
@@ -274,6 +276,13 @@ public class DestelloCore {
 }
 	 else
 		 dissassembly= "Invalid Instruction";
+	 if(print.level==1||print.level==2||print.level==3){
+		 System.out.println(reg[16]-4+" "+dissassembly);
+	 }
+	 else if (print.level==2||print.level==3)
+	 {
+		 System.out.println("I'm in decode");
+	 }
 	 return dissassembly;
 	 
 	 
@@ -289,7 +298,10 @@ public class DestelloCore {
 	 {
 		 reg[Rd]=operand2;
 	 }
-	 
+	if (print.level==2||print.level==3)
+	 {
+		 System.out.println("I'm in execute");
+	 }
  }// end of execute
  
  protected static long aluUnit(){
@@ -415,6 +427,10 @@ protected static void memoryAccessUnit(){
 	    mar= operand1 +operand2;
 	   ldResult =onChipMemory.readMemory(mar);
 	 }
+	 if (print.level==2||print.level==3)
+	 {
+		 System.out.println("I'm in memory access unit");
+	 }
  }
  
  protected static void writeBackUnit(){
@@ -441,6 +457,10 @@ protected static void memoryAccessUnit(){
 		 {
 			 reg[Rd]=aluResult;
 		 }
+	 }
+	 if (print.level==2||print.level==3)
+	 {
+		 System.out.println("I'm in writeback unit"+"Writeback value = " +reg[Rd]);
 	 }
  }
  
