@@ -670,28 +670,28 @@ package destello2;
  		        {
 
  		            case 0:
- 		                R0TF.setText(String.format("%08x",l));
+ 		                R0TF.setText(String.format("%08X",l));
  		            break;
- 		            case 1: R1TP.setText(String.format("%08x",l));
+ 		            case 1: R1TP.setText(String.format("%08X",l));
  		            break;
- 		            case 2: R2TP.setText(String.format("%08x",l));
+ 		            case 2: R2TP.setText(String.format("%08X",l));
  		            break;
- 		            case 3: R3TP.setText(String.format("%08x",l));
+ 		            case 3: R3TP.setText(String.format("%08X",l));
  		            break;
- 		            case 4: R4TP.setText(String.format("%08x",l));
- 		            case 5: R5TP.setText(String.format("%08x",l));
- 		            case 6: R6TP.setText(String.format("%08x",l));
- 		            case 7: R7TP.setText(String.format("%08x",l));
- 		            case 8: R8TP.setText(String.format("%08x",l));
- 		            case 9: R9TP.setText(String.format("%08x",l));
- 		            case 10: R10TP.setText(String.format("%08x",l));
- 		            case 11: R11TP.setText(String.format("%08x",l));
- 		            case 12: R12TP.setText(String.format("%08x",l));
- 		            case 13: R13TP.setText(String.format("%08x",l));
- 		            case 14: SPTP.setText(String.format("%08x",l));
- 		            case 15: RATP.setText(String.format("%08x",l));
- 		            case 16: PCTP.setText(String.format("%08x",l));
- 		            case 17: PSWTP.setText(String.format("%08x",l));
+ 		            case 4: R4TP.setText(String.format("%08X",l));
+ 		            case 5: R5TP.setText(String.format("%08X",l));
+ 		            case 6: R6TP.setText(String.format("%08X",l));
+ 		            case 7: R7TP.setText(String.format("%08X",l));
+ 		            case 8: R8TP.setText(String.format("%08X",l));
+ 		            case 9: R9TP.setText(String.format("%08X",l));
+ 		            case 10: R10TP.setText(String.format("%08X",l));
+ 		            case 11: R11TP.setText(String.format("%08X",l));
+ 		            case 12: R12TP.setText(String.format("%08X",l));
+ 		            case 13: R13TP.setText(String.format("%08X",l));
+ 		            case 14: SPTP.setText(String.format("%08X",l));
+ 		            case 15: RATP.setText(String.format("%08X",l));
+ 		            case 16: PCTP.setText(String.format("%08X",l));
+ 		            case 17: PSWTP.setText(String.format("%08X",l));
  		        }
  		     }
     }

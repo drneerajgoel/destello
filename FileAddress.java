@@ -97,8 +97,8 @@ public class FileAddress extends javax.swing.JFrame {
      String disView="";
      String currDissLine="";
      for (int i=0;i<4;i++){
-     String s1 = Long.toHexString(q);
-    String s2 = dissassembly[i];
+     String s1 =   String.format("%08X",q);
+    String s2 =  dissassembly[i];
          currDissLine = "0x"+s1+"\t \t \t"+s2+"\n";
          if(i==2){
              home.disTP.setForeground(Color.BLUE);

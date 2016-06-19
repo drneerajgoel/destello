@@ -126,17 +126,23 @@ package destello2;
 
 	       // TODO add your handling code here:
 	        String s = MemTF.getText();
+	        String memView="";
+	        String currView="";
 	        long l = Long.parseLong(s, 16);
 	        home.MemTA.setText("\n");
 	        long m = l+60;
 	        DestelloDebugger d = new DestelloDebugger();
 	                for(;l<=m;){
-	               long k =      d.getMemoryValue(l);
-	                String str = Long.toHexString(k);
-	                String strn = Long.toHexString(l);
-	                home.MemTA.setText(strn+ "\t" + "\t" + "\t" + "\t" + str+"\n");
+	                long k =      d.getMemoryValue(l);
+	                //String str = Long.toHexString(k);
+	                //String strn = Long.toHexString(l);
+	                String strf=String.format("%08X",k);
+	                String strnf=String.format("%08X",l);
+	              currView=("0x"+strnf+ "\t" +  "\t" + "0x"+strf+"\n");
+	              memView=memView+currView;
 	                l=l+4;
 	                }
+	                home.MemTA.setText("Address"+"\t"+"\t"+"Data"+"\n"+memView);
 	    }//GEN-LAST:event_jButton1ActionPerformed
 
 	    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
