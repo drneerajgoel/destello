@@ -23,7 +23,8 @@ package destello2;
 		 return memoryValue;
 	 }
 	 
-	 public void writeMemory(long address, long data){
+	 public void loadMemory(long address, long data){
+		 //System.out.println("I'm in load memory in debugger "+address+" "+data);
 		 onChipMemory.writeMemory(address,data);
 	 }
 	 

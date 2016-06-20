@@ -1,6 +1,6 @@
 package destello2;
 
 public class DebugPrint {
-	public int level=3;
+	public int level=2;
 
 }

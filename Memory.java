@@ -13,8 +13,10 @@ package destello2;
 		   return mem[index];	   
 	   }
 	   public void writeMemory(long addr, long data){
+		   //System.out.println("I'm in load memory in class memory "+addr+" "+data);
 		   int index=(int)addr/4;
 		   mem[index]=data;
+		 //  System.out.println("me value= "+mem[index]);
 	   }
 	   }
 	   

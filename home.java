@@ -641,13 +641,11 @@ package destello2;
 	        // TODO add your handling code here:
 	  
 	     p.debug(ary, true, false);
-	   
-	      
-	        long cur = p.currentPC;
-	    
-	    
-         PrintRegister();
 	     
+	     PrintRegister();
+	    int t= DestelloCore.time;
+	    String tim = Integer.toString(t);
+	    jTextField19.setText(tim);
 
 
 	    }//GEN-LAST:event_RunBtnActionPerformed

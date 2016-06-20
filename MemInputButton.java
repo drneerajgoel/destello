@@ -115,7 +115,7 @@ package destello2;
 
 	        pack();
 	    }// </editor-fold>//GEN-END:initComponents
-
+        DestelloDebugger d = new DestelloDebugger();
 	    private void DataTFMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_DataTFMouseClicked
 	        // TODO add your handling code here:
 	       DataTF.setEditable(true);
@@ -131,7 +131,7 @@ package destello2;
 	        long l = Long.parseLong(s, 16);
 	        home.MemTA.setText("\n");
 	        long m = l+60;
-	        DestelloDebugger d = new DestelloDebugger();
+
 	                for(;l<=m;){
 	                long k =      d.getMemoryValue(l);
 	                //String str = Long.toHexString(k);
@@ -146,10 +146,13 @@ package destello2;
 	    }//GEN-LAST:event_jButton1ActionPerformed
 
 	    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-	long l= Long.parseLong(MemTF.getText());
-	long m = Long.parseLong(DataTF.getText());
-	    DestelloDebugger d = new DestelloDebugger();
-	    d.writeMemory(l, m);
+	String s1=MemTF.getText();
+	String s2 =DataTF.getText();
+	    	long l= Long.parseLong(s1,16);
+	long m = Long.parseLong(s2,16);
+	
+	// System.out.println("I'm in load memory on write "+l+" "+m);
+	    d.loadMemory(l, m);
 
 	    }//GEN-LAST:event_jButton2ActionPerformed
 
