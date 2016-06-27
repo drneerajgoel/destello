@@ -18,30 +18,47 @@ Contact: destello-support@gmail.com
  * */
 package destello2;
 
-
-	public class Memory 
+public class Register 
+{
+	boolean pipeline  ;// variable to decide b/w pipelined and non-pipelined execution
+    long[] in= new long[7];// in register to hold input values to the stages of pipeline
+    long[] out= new long[7];// out register to hold the output values of stages of pipeline
+    
+	public Register(boolean x)// constructor to initialize pipeline
 	{
-		long [] mem = new long[5];
-	   
-		// constructor  to initialize memory
-		public Memory(int size){
-	      mem =  new long[size];
+		  pipeline=x;
+	}
+	
+	public long[] Read()
+	{
+		
+		if(pipeline){
+			return out;
 		}
-	   public  long readMemory(long pC){
-		   int index=(int)(pC/4);
-		   return mem[index];	   
-	   }
-	   public void writeMemory(long addr, long data){
+		else
+		{
+			return in;
+		}
+	}
+	public void Write (long[] value)
+	{ 
+		for(int i=0; i<7;i++)
+		{
+		in[i]=value[i];
+		}
+		
+	}
 	
-		   int index=(int)addr/4;
-		   mem[index]=data;
+	public void Clock()
+	{
+		if(pipeline)
+		{ 
+			for(int i=0; i<7;i++)
+			{
+			out[i]=in[i];
+			}
+			
+		}
+	}
 	
-	   }
-	 }
-	   
-
-	   
-	   
-
-
-
+}

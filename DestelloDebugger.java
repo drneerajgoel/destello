@@ -1,16 +1,34 @@
+/*Copyright (C) 2016, IIT Ropar
+This file is part of Destello.
+
+    Destello is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Destello is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+Authors: Sourodeep, Gian, Neeraj (change the order according to file)
+Contact: destello-support@gmail.com
+ * */
 package destello2;
 
 
 	import java.io.*;
 	import java.util.*;
-
+    
 
 	public class DestelloDebugger extends DestelloCore {
 		 long currentPC=startingPC;//stores value of last executed pc
 		   int k=0;
 		 int MAX =20;
 		  private Long nextPC;
-
+		  int cycles=0;
 		 public long getRegisterValue(int RegID){
 		 long registerValue;
 		 registerValue=reg[RegID];
@@ -45,33 +63,41 @@ package destello2;
 			 String data=x.next();
 			 long inputinst=Long.parseLong(data, 16);
 			 onChipMemory.writeMemory(instaddr, inputinst);	 
-			 time++;
+			 cycles++;
 		 }
 		
 		 x.close();
-		 startingPC=instaddr-(4*time)+ 4;
-		 if(print.level==2||print.level==3)
+		 startingPC=instaddr-(4*cycles)+ 4;
+		 if(print.level>=2)
 		 {
-			 System.out.println("Starting pc="+startingPC);
+			 System.out.println("Starting pc= "+startingPC);
+			 System.out.println("Cycles= "+cycles);
 		 }
-		}
+		
+	}
 	//this function provides disassembly of at most 20 instructions
 	public String[] disassemblyView(long startPC){
-		  String[] fullDisassembly= new String[time];
-		  reg[16]=startPC;
+	 
+		String[] fullDisassembly= new String[cycles];
+		  ProgramCounter=startPC;
 		  for(int i=0;i<MAX;i++)
-		  {
+		  { 
 			  fetch();
-			  fullDisassembly[i]=decode();
-			  if(controlSignals[23]==1)
-			  {
+			  fullDisassembly[i]=decode(true);
+			  if(print.level>=2){
+			  System.out.println(" disassembly in debugger "+fullDisassembly[i]);
+			  }
+			   if(getNthBit(control,23)==1)
+			   {
 				  break;
 			
-			  }
+			   }
 		  }
-		  reg[16]=startingPC;
 		  
-		   return fullDisassembly;
+		  ProgramCounter=startingPC;
+		  control=0;
+		
+		  return fullDisassembly;
 	 }
 
 	/*debug function accepts breakpoints array
@@ -82,7 +108,6 @@ package destello2;
 	 */
 	public void debug(Long[] breakpoints,boolean yes, boolean step){
 		 // yes takes the value high when either run, continue is pressed
-		int i;  
 		
 		  if(step)
 		  {
@@ -92,38 +117,30 @@ package destello2;
 		  else if(yes)
 		  {
 			  nextPC=breakpoints[k];
-			  System.out.println("i'm in debug on run "+nextPC);
+			  System.out.println("i'm in debug on run nextPC and currentPc"+nextPC+" "+currentPC);
 			  System.out.println("i'm in debug on run time is "+time);
-			  if((nextPC < startingPC + 4*time)&&nextPC!=0L)
+			  while(getNthBit(control,23)!=1)
 			  	{
-				  	i= (int)(nextPC-currentPC)/4;//number of instructions that need to be calculated  
-				  	 k++;
+				  run();
+				  if(ProgramCounter==nextPC)
+				  {
+					  k++;
+					  break;
+				  }
+				  time++;
+
 				}
-			  else 
-			  	{
-				  	i=time;
-			  	}
-			  for(int j=0;j<i;j++)
-			  	{
-				  run();	  
-				  System.out.println("I'm in run in debug");
-			  	}
-			  
+
 		    
 		  }
-		  currentPC=reg[16];
+		  currentPC=ProgramCounter;
 		  
 		  yes=false;
-		  if(print.level==2||print.level==3)
+		  if(print.level>=2)
 			 {
 				 System.out.println("current pc="+currentPC);
 			 }
-		  if(print.level==3)
-			 { for(int x=0;x<18;x++){
-				 System.out.println("Register"+x+" "+reg[x]);
-			   }
-			 }
-		  
+			  
 		}
 		  
 		  

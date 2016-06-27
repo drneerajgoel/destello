@@ -13,35 +13,12 @@ This file is part of Destello.
 
     You should have received a copy of the GNU General Public License
     along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
-Authors: Sourodeep, Gian, Neeraj (change the order according to file)
+Authors: Sourodeep, Gian, Neeraj 
 Contact: destello-support@gmail.com
  * */
 package destello2;
 
-
-	public class Memory 
-	{
-		long [] mem = new long[5];
-	   
-		// constructor  to initialize memory
-		public Memory(int size){
-	      mem =  new long[size];
-		}
-	   public  long readMemory(long pC){
-		   int index=(int)(pC/4);
-		   return mem[index];	   
-	   }
-	   public void writeMemory(long addr, long data){
-	
-		   int index=(int)addr/4;
-		   mem[index]=data;
-	
-	   }
-	 }
-	   
-
-	   
-	   
-
-
-
+public class DestelloConfig {
+	public static final int MEM_SIZE = 1024;
+	public static final int NUM_REG = 16;
+}

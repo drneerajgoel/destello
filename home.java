@@ -1,3 +1,22 @@
+/*Copyright (C) 2016, IIT Ropar
+This file is part of Destello.
+
+    Destello is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Destello is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+Authors: Sourodeep, Gian, Neeraj (change the order according to file)
+Contact: destello-support@gmail.com
+ * */
+
 package destello2;
 
 
@@ -29,7 +48,7 @@ package destello2;
 
 	public class home extends javax.swing.JFrame {
 		private static final long serialVersionUID = 1L;
-		BreakPoint h=new BreakPoint();
+		BreakPoint obj1=new BreakPoint();
 		 
 	       Long[] ary = {0L};
 		
@@ -601,12 +620,12 @@ package destello2;
 
 	        pack();
 	    }// </editor-fold>//GEN-END:initComponents
-	    DestelloDebugger p = new DestelloDebugger();
+	    DestelloDebugger obj = new DestelloDebugger();
 	      
 	
 	    private void StepBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_StepBtnActionPerformed
 	    	Long Array[] = BreakPoint.list;
-	    	p.debug(Array,false,true);
+	    	obj.debug(Array,false,true);
    PrintRegister();
 	 	     
 	}//GEN-LAST:event_StepBtnActionPerformed
@@ -623,14 +642,14 @@ package destello2;
 	}//GEN-LAST:event_EnterCodeBtnActionPerformed
 
 	    private void BkptBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BkptBtnActionPerformed
-	       BreakPoint b = new BreakPoint();
-	       b.setVisible(true);
+	       BreakPoint frame1 = new BreakPoint();
+	       frame1.setVisible(true);
 	       
 	    }//GEN-LAST:event_BkptBtnActionPerformed
 
 	    private void MemValueBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MemValueBtnActionPerformed
-	                MemInputButton m = new MemInputButton();
-	                m.setVisible(true);
+	                MemInputButton frame2 = new MemInputButton();
+	                frame2.setVisible(true);
 	                
 	    }//GEN-LAST:event_MemValueBtnActionPerformed
 	 
@@ -640,29 +659,31 @@ package destello2;
 	    private void RunBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RunBtnActionPerformed
 	        // TODO add your handling code here:
 	  
-	     p.debug(ary, true, false);
+	     obj.debug(ary,true,false);
 	     
 	     PrintRegister();
-	    int t= DestelloCore.time;
-	    String tim = Integer.toString(t);
+	    int tym= DestelloCore.time;
+	    String tim = Integer.toString(tym);
 	    jTextField19.setText(tim);
-
+	    obj.currentPC=obj.startingPC;
 
 	    }//GEN-LAST:event_RunBtnActionPerformed
 
 	    private void ContBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ContBtnActionPerformed
-	    	Long Array2[] = BreakPoint.a;
-	    	  for(int i=0;i<Array2.length;i++){
-	              System.out.println(Array2[i]);}
+	    	Long Array2[] = BreakPoint.arry;
+	    	  
 	     
-	        p.debug(Array2,true, false);
+	        obj.debug(Array2,true, false);
 	        PrintRegister();
 		     
 	    }//GEN-LAST:event_ContBtnActionPerformed
-    private void PrintRegister(){
-        for(int i=0;i<18;i++)
+    private void PrintRegister()
+    {
+    	long psw=DestelloCore.PSW;
+    	long pc=DestelloCore.ProgramCounter;
+        for(int i=0;i<16;i++)
  		    {
- 		        long l = p.getRegisterValue(i);
+ 		        long l = obj.getRegisterValue(i);
  		            //  System.out.println(""+l+","+i);
  		        switch(i)
  		        {
@@ -688,10 +709,10 @@ package destello2;
  		            case 13: R13TP.setText(String.format("%08X",l));
  		            case 14: SPTP.setText(String.format("%08X",l));
  		            case 15: RATP.setText(String.format("%08X",l));
- 		            case 16: PCTP.setText(String.format("%08X",l));
- 		            case 17: PSWTP.setText(String.format("%08X",l));
- 		        }
+ 		            }
  		     }
+        PCTP.setText(String.format("%08X",pc));
+        PSWTP.setText(String.format("%08X",psw));
     }
 	    /**
 	    * @param args the command line arguments
