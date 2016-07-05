@@ -31,46 +31,51 @@ package destello2;
 		  * since flags.e and flags.gt cannot be set simultaneously therefore r[17]=1(flags.e) r[17]=2 flags.gt r[17]=0 default
 		  * */
 		
-
-		 private static long inst;
-		 public static long ProgramCounter;
+		 static AssemblerUtilities assembler =new AssemblerUtilities();
+		 public static long inst;
+		 public static long ProgramCounter=0;
 		 static int PSW;
 		 private static long nop=1744830464;
-		 private static long branchPC;
+		 public static long branchPC;
 		 public  static int time=0;
 		 protected  long startingPC;
 	     static boolean ConflictFlag=false;
-	     static Memory onChipMemory = new Memory(DestelloConfig.MEM_SIZE);// instruction memory created 4K bytes
-         static Register If_Dec= new Register(true);
-         static Register Dec_Ex= new Register(true);
-         static Register Ex_Ma= new Register(true);
-         static Register Ma_Wb= new Register(true);
+	   
+	     // public static onChipMemory2 = new assembler.onChipMemory();// instruction memory created 4K bytes
+         static Register If_Dec= new Register(DestelloConfig.PIPELINE);
+         static Register Dec_Ex= new Register(DestelloConfig.PIPELINE);
+         static Register Ex_Ma= new Register(DestelloConfig.PIPELINE);
+         static Register Ma_Wb= new Register(DestelloConfig.PIPELINE);
 		 static DebugPrint print = new DebugPrint();
 		 protected static int control ;// controlsignals[22]=isBranchTaken controlsignals[23]=nop
+		 protected static int isBranchTaken;
 		public static long[] pipelineReg2=new long[7];
 		 
   protected static void fetch()
   {//start of fetch method
+	 
+	//  long PC = ProgramCounter;
 			 
-			 long PC = ProgramCounter;
 			 long[] pipelineReg1=new long[7];
-			 pipelineReg1[0]=ProgramCounter;
+			 
 		
 			 
 		if((ConflictFlag==false))
 		  {  
-		     if(getNthBit(control,22)==1)
+		     if(isBranchTaken==1)
 			  {
 		    	 ProgramCounter= branchPC;
-				  control=(int) setNthBit(control,22,0);
+		    	 isBranchTaken=0;
 			  }
 		     else
 		     {
 		    	 ProgramCounter= (ProgramCounter+4);     
 		     }
 		  }
-		
-		inst = onChipMemory.readMemory(PC); 
+
+		  long PC = ProgramCounter;
+		  pipelineReg1[0]=ProgramCounter;
+		inst = AssemblerUtilities.onChipMemory.readMemory(PC); 
 			  		pipelineReg1[1]=inst;
 
 	  if(print.level==2)
@@ -213,69 +218,88 @@ package destello2;
 				 
 				 control=(int)setNthBit(control,9,1);
 				 control=(int)setNthBit(control,6,1);//is wb
-				 operation="add";
+				 if(modifiers==0)operation="add";
+				 else if(modifiers==1) operation = "addu";
+				 else if(modifiers==2) operation = "addh";
 				 break;
 			 }
 			 case 1://sub isSub
 			 {
 				 control=(int)setNthBit(control,10,1);
 				 control=(int)setNthBit(control,6,1);//is wb
-				 operation="sub";
+				 if(modifiers==0)operation="sub";
+				 else if(modifiers==1)operation="subu";
+				 else if(modifiers==2)operation="subh";
 				 break;
 			 } 
 			 case 2://mul isMul
 			 {
 				 control=(int) setNthBit(control,12,1);
 				 control=(int)setNthBit(control,6,1);//is wb
-				 operation="mul";
+				 if(modifiers==0)operation="mul";
+				 else if(modifiers==1)operation="mulu";
+				 else if(modifiers==2)operation="mulh";
 				 break;
 			 } 	        
 			 case 3://div isDiv
 			 {
 				 control=(int) setNthBit(control,13,1);
 				 control=(int)setNthBit(control,6,1);//is wb
-				 operation="div";
+				 if(modifiers==0)operation="div";
+				 else if(modifiers==1)operation="divu";
 				 break;
 			 } 	 
 			 case 4: // mod isMod
 			 {
 				 control=(int) setNthBit(control,14,1);
 				 control=(int)setNthBit(control,6,1);//is wb
-				 operation="mod";
+				 if(modifiers==0)operation="mod";
+				 else if(modifiers==1)operation="modu";
+				 else if(modifiers==2)operation="moh";
 				 break;
 			 }
 			 case 5: // cmp isCmp
 			 {
 				 control=(int)setNthBit(control,11,1);
-				 operation="cmp";
+				 if(modifiers==0)operation="cmp";
+				 else if(modifiers==1)operation="cmpu";
+				 else if(modifiers==2)operation="cmph";
 				 break;
 			 }
 			 case 6: // and isAnd
 			 {
 				 control=(int)setNthBit(control,19,1);
 				 control=(int)setNthBit(control,6,1);//is wb
-				 operation="and";
+				 if(modifiers==0)operation="and";
+				 else if(modifiers==1)operation="andu";
+				 else if(modifiers==2)operation="andh";
 				 break;
 			 }
 			 case 7: // or isOr
 			 {
 				 control=(int)setNthBit(control,18,1);
 				 control=(int)setNthBit(control,6,1);//is wb
-				 operation="and";
+				 if(modifiers==0)operation="or";
+				 else if(modifiers==1)operation="oru";
+				 else if(modifiers==2)operation="orh";
 				 break;
 			 }
 			 case 8: //not isNot
 			 {
 				 control=(int)setNthBit(control,20,1);
 				 control=(int)setNthBit(control,6,1);//is wb
-				 operation="not";
+				 if(modifiers==0)operation="not";
+				 else if(modifiers==1)operation="notu";
+				 else if(modifiers==2)operation="noth";
 				 break;
 			 }
 			 case 9: //mov isMov
 			 {
 				 control=(int) setNthBit(control,21,1);
 				 control=(int) setNthBit(control,6,1);//is wb
-				 operation="mov";
+				 if(modifiers==0)operation="mov";
+				 else if(modifiers==1)operation="movu";
+				 else if(modifiers==2)operation="movh";
 				 break;
 			 }
 			 case 10: //lsl isLsl
@@ -335,17 +359,16 @@ package destello2;
 				 operation="b";
 				 break;
 			 }
-			 case 19: //call isUBrranch
+			 case 19: //call isCall
 			 {
 				 control=(int)setNthBit(control,8,1);//isCall
-				 control=(int)setNthBit(control,7,1);//is UBranch
 				 control=(int)setNthBit(control,6,1);//iswb
 				 operation="call";
 				 break;
 			 }
-			 case 20: //ret isUBranch
+			 case 20: //ret  isRet
 			 {
-				 control=(int)setNthBit(control,7,1);
+				 control=(int)setNthBit(control,4,1);
 				 operation="ret";
 				 break;
 			 }
@@ -421,7 +444,7 @@ package destello2;
 		Dec_Ex.Write(pipelineReg3);
 		if(print.level>=1)
 		{
-			System.out.println(ProgramCounter+" "+dissassembly+"value of rd"+Rd);
+			System.out.println(pipelineReg2[0]+" "+dissassembly+"value of rd"+Rd);
 		}
 			
 		return dissassembly;
@@ -547,7 +570,7 @@ package destello2;
 			 {
 				 if (PSW==1)
 				 {
-					 control=(int)setNthBit(control,22,1);
+					 isBranchTaken=1;
 					 branchPC=pipelineReg[2]<<2;
 				 }
 			 }
@@ -556,28 +579,37 @@ package destello2;
 			 {
 				 if (PSW==2)
 				 {
-					 control=(int)setNthBit(control,22,1);
-					 branchPC=pipelineReg[2]<<2;
+					 isBranchTaken=1;
+					 branchPC = pipelineReg[2]<<2;
 				 }		 
 			 }
 			
-			else if(getNthBit(pipelineReg[0],4)==1)// ret
+			else if(getNthBit(pipelineReg[0],4)==1)// only ret
 			 {
-				control=(int)setNthBit(control,22,1);
+				isBranchTaken=1;
 				 branchPC=reg[15];//return address
 			 }
 			 
-			else if(getNthBit(pipelineReg[0],7)==1)//b,call,ret
+			else if(getNthBit(pipelineReg[0],7)==1)//only b
 			 {
-				control=(int)setNthBit(control,22,1);
+				isBranchTaken=1;
+				 branchPC=pipelineReg[2]<<2;
+				 
 			 }
-			 else if(getNthBit(pipelineReg[0],8)==1)
+			 else if(getNthBit(pipelineReg[0],8)==1)//only call
 			 {
-				 reg[15]= ProgramCounter+4;
+				 isBranchTaken=1;
+				 branchPC=pipelineReg[2]<<2;
+				 if(print.level>=2)
+				 {
+					 System.out.println(" global PC and local  in branch unit "+ProgramCounter+" "+pipelineReg[1]);
+				 }
+				 reg[15]= pipelineReg[1]+ 4;
 			 }
 	
 			// branch control unit starts here
-			if(getNthBit(control,22)==1&&If_Dec.pipeline==true)
+			branchControlUnit();
+			/*if(getNthBit(control,22)==1&&If_Dec.pipeline==true)
 			{
 				long[] Reg =new long [7];
 				Reg=If_Dec.Read();
@@ -590,7 +622,7 @@ package destello2;
 				Reg[6]=nop;
 				Dec_Ex.Write(Reg);
 				
-			}
+			}*/
 			
 		}
 		 
@@ -606,15 +638,15 @@ package destello2;
 			 {
 				 mar = pipelineReg6[5];
 				 mdr = reg[rd];
-				 onChipMemory.writeMemory(mdr, mar);
+				 AssemblerUtilities.onChipMemory.writeMemory(mar, mdr);
 				 pipelineReg7[0]=(int)setNthBit(pipelineReg7[0],0,0);
 			 }
 			 else if(getNthBit(pipelineReg6[0],1)==1)  // execution of load
 			 {
 			    mar= pipelineReg6[5];
-			    pipelineReg7[2] =onChipMemory.readMemory(mar);
+			    pipelineReg7[2] =AssemblerUtilities.onChipMemory.readMemory(mar);
 			 }
-			 if (print.level==2||print.level==3)
+			 if (print.level>=2)
 			 {
 				 System.out.println("I'm in memory access unit"+"value of rd "+ rd);
 			 }
@@ -643,7 +675,7 @@ package destello2;
 				  }
 				 else if(getNthBit(pipelineReg8[0],8)==1)//isCall is high
 				 {
-					 reg[15]=ProgramCounter+4;
+					 reg[15]=pipelineReg8[1]+4;
 					 pipelineReg8[0]=(int)setNthBit(pipelineReg8[0],8,0);
 					 control=(int)setNthBit(control,8,0);
 				 }
@@ -659,7 +691,7 @@ package destello2;
 				 }
 			}
 			
-		 if (print.level==2||print.level==3)
+		 if (print.level>=2)
 			 {
 				 System.out.println("I'm in writeback unit"+"Rd value = " +rd+" "+reg[rd]);
 			 }
@@ -679,23 +711,11 @@ package destello2;
 			 Dec_Ex.Clock();
 			 Ex_Ma.Clock();
 			 Ma_Wb.Clock();
-			 
+			 control=0;
 			return s1;
 	}
 		 
-	public void reset()
-	{
-			 int j;
-			 for(j=0;j<16;j++)
-			 {
-				 reg[j]=0;
-			 }
-			 ProgramCounter=startingPC;
-			 control=0;
-			 branchPC=0;
-			   
-			 
-	}
+
 	
    static boolean CheckConflict(long A, long B)
    {
@@ -711,32 +731,37 @@ package destello2;
 	   
 	   //check for the opcode of instruction A
 	    I=(int)getNthBit(A,26);
-	    //I=I&1;
+	    
 	    rdA=(int)getNBits(A,22,4);
-	   //rdA=rdA&15;
+	   
 	    opA=(int)getNBits(A,27,5);
-	    //opA=31&opA;
+	   
+	    if(print.level>=2)
+	    {
 	    System.out.println("valuue of opA "+opA);
-	    if(opA==13||opA==18||opA==16||opA==17||opA==19)
+	    }
+	    if(opA==13||opA==18||opA==16||opA==17||opA==19||opA==21)
 	    return false;
 	    
 	   
 	  //check for the opcode of instruction B
 	    rdB=(int)getNBits(B,22,4);
-	    //rdB=rdB&15;
-	    opB=(int)getNBits(B,27,5);
-	    //opB=31&opB;
+	   	    opB=(int)getNBits(B,27,5);
+	   
+	    if(print.level>=2)
+	    {
 	    System.out.println("valuue of opB "+opB);
-	    if(opB==13||opB==18||opB==16||opB==17||opB==19)
+	    }
+	    if(opB==13||opB==18||opB==16||opB==17||opB==19||opB==21)
 	    	return false;
 	    
 	    
 	    //Check for sources of A
 	    
 	    src1=(int)getNBits(A,18,4);
-	   // src1=src1&15;
+	   
 	    src2=(int)getNBits(A,14,4);
-	    //src2=src2&15;
+	    
 	     if(opA==15)
 	     {
 	    	 src2=rdA;
@@ -755,7 +780,7 @@ package destello2;
 	   System.out.println("source 1 "+src1 );  
 	   System.out.println("source2 "+src2 );  
 	 // check the second operand to see if it is a register 
-	    if(opA!=15)
+	    if(opA==15)
 	    {
 	    	if(I==1)
 	    	{
@@ -763,6 +788,13 @@ package destello2;
 	    	}
 	    }
 	    
+	    if(opB==9||opB==8)
+	    {
+	    	if(src1==dest)
+	    	{
+	    		return false;
+	    	}
+	    }
 	 //Detects conflicts 
 	    
 	    if(src1==dest)
@@ -798,7 +830,23 @@ package destello2;
 		 return  bits;
 	 }
 
-	
+	public static void branchControlUnit()
+	{
+		if(isBranchTaken==1&&If_Dec.pipeline==true)
+		{
+			long[] Reg =new long [7];
+			Reg=If_Dec.Read();
+			Reg[1]=nop;// opcode for nop
+			If_Dec.Write(Reg);
+			for(int i=0;i<6;i++)// all control signals set to 0
+			{
+				Reg[i]=0;
+			}
+			Reg[6]=nop;
+			Dec_Ex.Write(Reg);
+			
+		}
+	}
 }// end of class 
 		 
 

@@ -138,7 +138,7 @@ package destello2;
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-        DestelloDebugger obj = new DestelloDebugger();
+       // DestelloDebugger obj = new DestelloDebugger();
 	    private void DataTFMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_DataTFMouseClicked
 	        // TODO add your handling code here:
 	       DataTF.setEditable(true);
@@ -151,14 +151,13 @@ package destello2;
 	        String s = MemTF.getText();
 	        String memView="";
 	        String currView="";
-	        long l = Long.parseLong(s, 16);
+	        long l = Long.decode(s);
 	        home.MemTA.setText("\n");
 	        long m = l+60;
 
 	                for(;l<=m;){
-	                long k =      obj.getMemoryValue(l);
-	                //String str = Long.toHexString(k);
-	                //String strn = Long.toHexString(l);
+	                int k =  (int)   FileAddress. obj.getMemoryValue(l);
+	               
 	                String strf=String.format("%08X",k);
 	                String strnf=String.format("%08X",l);
 	              currView=("0x"+strnf+ "\t" +  "\t" + "0x"+strf+"\n");
@@ -176,10 +175,30 @@ package destello2;
 	long m = Long.parseLong(data,16);
 	
 	// System.out.println("I'm in load memory on write "+l+" "+m);
-	    obj.loadMemory(l, m);
+	FileAddress. obj.loadMemory(l, m);
 dispose();
 }//GEN-LAST:event_WriteBtnActionPerformed
 
+        public void memoryView()
+        {
+           
+	        String memView="";
+	        String currView="";
+	       long l=0L;
+	        home.MemTA.setText("\n");
+	        long m = l+60;
+
+	                for(;l<=m;){
+	                int k =  (int)   FileAddress. obj.getMemoryValue(l);
+	               
+	                String strf=String.format("%08X",k);
+	                String strnf=String.format("%08X",l);
+	              currView=("0x"+strnf+ "\t" +  "\t" + "0x"+strf+"\n");
+	              memView=memView+currView;
+	                l=l+4;
+	                }
+	                home.MemTA.setText("Address"+"\t"+"\t"+"Data"+"\n"+memView);
+        }
 	    /**
 	    * @param args the command line arguments
 	    */

@@ -29,7 +29,8 @@ package destello2;
 		 int MAX =20;
 		  private Long nextPC;
 		  int cycles=0;
-		 public long getRegisterValue(int RegID){
+	
+	public long getRegisterValue(int RegID){
 		 long registerValue;
 		 registerValue=reg[RegID];
 		return registerValue ;
@@ -37,37 +38,20 @@ package destello2;
 	 
 	 public long getMemoryValue(long address){
 		 long memoryValue;
-		 memoryValue= onChipMemory.readMemory(address);
+		 memoryValue= AssemblerUtilities.onChipMemory.readMemory(address);
 		 return memoryValue;
 	 }
 	 
 	 public void loadMemory(long address, long data){
-		 //System.out.println("I'm in load memory in debugger "+address+" "+data);
-		 onChipMemory.writeMemory(address,data);
+		
+		 AssemblerUtilities.onChipMemory.writeMemory(address,data);
 	 }
 	 
-	 public void loadInstMemory(String filename){
-		 long instaddr =0L;
-		 Scanner x=null;
-		try{
-		x = new Scanner( new File(filename));
-		}
-		catch(Exception e){
-			System.out.println("File Not Found");
-		}
-		 while(x.hasNext())
-		 {
-			 String pc = x.next();
-			 instaddr=Long.decode(pc);
-			 
-			 String data=x.next();
-			 long inputinst=Long.parseLong(data, 16);
-			 onChipMemory.writeMemory(instaddr, inputinst);	 
-			 cycles++;
-		 }
+	 public void loadInstMemory(String filename) throws IOException{
 		
-		 x.close();
-		 startingPC=instaddr-(4*cycles)+ 4;
+		 assembler.runAssembler(filename);
+		 cycles=AssemblerUtilities.instructionIndex;
+		 startingPC=AssemblerUtilities.ProgramCounterAs-(4*cycles);
 		 if(print.level>=2)
 		 {
 			 System.out.println("Starting pc= "+startingPC);
@@ -87,13 +71,14 @@ package destello2;
 			  if(print.level>=2){
 			  System.out.println(" disassembly in debugger "+fullDisassembly[i]);
 			  }
-			   if(getNthBit(control,23)==1)
+			   if(i>=cycles-1)
 			   {
 				  break;
 			
 			   }
 		  }
 		  
+	
 		  ProgramCounter=startingPC;
 		  control=0;
 		
@@ -108,6 +93,8 @@ package destello2;
 	 */
 	public void debug(Long[] breakpoints,boolean yes, boolean step){
 		 // yes takes the value high when either run, continue is pressed
+		long[] pipelineRegister=new long[7];
+		pipelineRegister=Dec_Ex.Read();
 		
 		  if(step)
 		  {
@@ -116,10 +103,13 @@ package destello2;
 		  }
 		  else if(yes)
 		  {
+			  
+			  
 			  nextPC=breakpoints[k];
+			  
 			  System.out.println("i'm in debug on run nextPC and currentPc"+nextPC+" "+currentPC);
 			  System.out.println("i'm in debug on run time is "+time);
-			  while(getNthBit(control,23)!=1)
+			  while(getNthBit(pipelineRegister[0],23)!=1)
 			  	{
 				  run();
 				  if(ProgramCounter==nextPC)
@@ -142,9 +132,58 @@ package destello2;
 			 }
 			  
 		}
-		  
-		  
+public void runFullCode()
+	{
+	long[] pipelineRegister=new long[7];
+	pipelineRegister=Ma_Wb.Read();
+	 while(getNthBit(pipelineRegister[0],23)!=1)
+	  	{
+		  run();
+		 /*if(getNthBit(pipelineRegister[0],8)==1)
+		 {
+			 System.out.println("PC global and PC in Execute unit"+ProgramCounter +" "+ pipelineRegister[1]);
+			 break;
+		 }*/
+		  currentPC=ProgramCounter;
+		  time++;
+
+		}
+	 if(print.level>=2)
+	 {
+		 System.out.println("current pc="+currentPC);
+	 }
 	}
+public void reset(boolean fullReset)
+{
+		 long[] pipelinereg= new long[7];
+		 for(int j=0;j<16;j++)
+		 {
+			 reg[j]=0;
+		 }
+		If_Dec.Write(pipelinereg);
+		Dec_Ex.Write(pipelinereg);
+		Ex_Ma.Write(pipelinereg);
+		Ma_Wb.Write(pipelinereg);
+		ProgramCounter=0;
+		 control=0;
+		 branchPC=0;
+		 isBranchTaken=0;
+		 inst=0;
+		 PSW=0;
+		 ConflictFlag=false;
+		 time=0;
+		 startingPC=0;
+		 currentPC=0;
+		 cycles=0;
+		 k=0;
+		 nextPC=0L;
+		 if(fullReset==true)
+		 {
+		 assembler.resetAssembler();
+		 }
+}
+	
+}
 
 
 

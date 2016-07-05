@@ -20,6 +20,7 @@ Contact: destello-support@gmail.com
 package destello2;
 
 import java.awt.Color;
+import java.io.IOException;
 
 
 
@@ -43,7 +44,8 @@ public class FileAddress extends javax.swing.JFrame {
     /**
 	 * 
 	 */
-	DestelloDebugger obj = new DestelloDebugger();
+	public static DestelloDebugger obj = new DestelloDebugger();
+//	home homeObj=new home();
 	private static final long serialVersionUID = 1L;
 	/** Creates new form FileAddress */
     public FileAddress() {
@@ -68,7 +70,12 @@ public class FileAddress extends javax.swing.JFrame {
         OkayBtn.setText("Okay");
         OkayBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                OkayBtnActionPerformed(evt);
+                try {
+					OkayBtnActionPerformed(evt);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
             }
         });
 
@@ -102,35 +109,37 @@ public class FileAddress extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void OkayBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OkayBtnActionPerformed
+    private void OkayBtnActionPerformed(java.awt.event.ActionEvent evt) throws IOException {//GEN-FIRST:event_OkayBtnActionPerformed
         String adres = AddressTF.getText();
-        
+        obj.reset(true);
         obj.loadInstMemory(adres);
-     long q =  obj.startingPC;
+        printDisView();
+  
+     home.PrintRegister();
+     home.mem.memoryView();
+        dispose();
+
+    }//GEN-LAST:event_OkayBtnActionPerformed
+
+ public void printDisView()
+ {
+     long q =  obj.startingPC + 4;
      System.out.println(" Starting PC in GUI "+ q);
         String  dissassembly[];
-      dissassembly = obj.disassemblyView(q);
+      dissassembly = obj.disassemblyView(q-4);
    
      long r = obj.cycles;
      String disView="";
      String currDissLine="";
      for (int i=0;i<r;i++){
      String s1 =   String.format("%08X",q);
-    String s2 =  dissassembly[i];
-         currDissLine = "0x"+s1+"\t \t \t"+s2+"\n";
-         if(i==2){
-             home.disTP.setForeground(Color.BLUE);
-         }
-         else
-             home.disTP.setForeground(Color.BLACK);
-         disView = disView+ currDissLine;
+     String s2 =  dissassembly[i];
+         currDissLine = "  0x"+s1+"\t \t"+s2+"\n";
+         disView = disView+currDissLine;
      q=q+4;
      }
      home.disTP.setText(disView );
-        dispose();
-
-    }//GEN-LAST:event_OkayBtnActionPerformed
-
+ }
     /**
     * @param args the command line arguments
     */

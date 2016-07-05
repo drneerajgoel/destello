@@ -21,4 +21,5 @@ package destello2;
 public class DestelloConfig {
 	public static final int MEM_SIZE = 1024;
 	public static final int NUM_REG = 16;
+	public static final boolean PIPELINE=false;
 }

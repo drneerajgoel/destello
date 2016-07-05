@@ -45,7 +45,7 @@ public class BreakPoint extends javax.swing.JFrame {
 	 static ArrayList<Long> bkpt = new ArrayList<Long>();
 	   static Long[] list= new Long[bkpt.size()] ;
 	   static Long[] arry=new Long[10]; 
-	DestelloDebugger obj= new DestelloDebugger();
+	//DestelloDebugger obj= new DestelloDebugger();
 
 	private static final long serialVersionUID = 1L;
 
@@ -145,13 +145,14 @@ public class BreakPoint extends javax.swing.JFrame {
 }//GEN-LAST:event_bkTFActionPerformed
 
     private void OkayBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-
+    BreakpointMark();
+    FileAddress. obj.reset(false);
     dispose();
-    obj.reset();
+   
     }//GEN-LAST:event_OkayBtnActionPerformed
 
     private void SetBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        String s = bkTF.getText();
+         String s = bkTF.getText();
          long value = Long.decode(s);
          Long value1= new Long(value);
          
@@ -168,6 +169,41 @@ public class BreakPoint extends javax.swing.JFrame {
         arry= bkpt.toArray(list);
         bkTF.setText("");
     }//GEN-LAST:event_jButton2ActionPerformed
+    
+    public void BreakpointMark()
+    {
+    	String[] lines = home.disTP.getText().split("\n");
+    	for(int i=0;i<lines.length ;i++)
+    	{
+    		System.out.println(" lines "+"\n"+ lines[i]);
+    	}
+    	int size = lines.length;
+    	int bkptsize = bkpt.size();
+    	String DissView ="";
+    	String currLine="";
+    	
+    	for(int i=0;i<bkptsize;i++)
+    	{
+    		long m = arry[i];
+    		int k = (int) m;
+    		int j = ((k - (int)(FileAddress.obj.startingPC))/4) -1;
+    		System.out.println(" value bk index "+j);
+
+    		String str1 = lines[j];
+    		String str2 = str1.replace(" 0x","*0x");
+    		lines[j] = str2;
+    	}
+    	home.disTP.setText(" ");
+    	for(int l = 0;l<size;l++)
+    	{
+    		currLine=lines[l]+"\n";
+    		DissView= DissView+ currLine;
+    		 
+    	}
+    	home.disTP.setText(DissView);
+    	//home.disTA.setCaret(lines);
+    }
+
 
     /**
     * @param args the command line arguments
